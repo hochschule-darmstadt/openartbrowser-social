@@ -54,7 +54,6 @@ class TwitterBot:
         postArtistName = body_artist["hits"]["hits"][0]["_source"]["label"]
         print("artist_name:", postArtistName)
 
-
         self.image_download(image_link)
         imgpath = "/home/ahmad/PycharmProjects/openartbrowser-social/image.jpg"
 
@@ -62,9 +61,9 @@ class TwitterBot:
         print("imgSizeByte ist: ", imgSizeByte)
 
         if imgSizeByte > image_limit:
-            artwork_list = artworkQIDs[postQIDPos + 1:]
-            print("new list ist: ", artwork_list)
-            TwitterBot(artwork_list)
+            self.addPostedArtwork(postQID)
+            TwitterBot(self.artworkQIDs)
+
         else:
             if imgSizeByte > defaultSize:
                 limit_img_size(
@@ -140,16 +139,14 @@ class TwitterBot:
         print("Added artwork QID " + artworkQID + " to persistent file.")
 
 
-
 response = requests.get(url, data=json.dumps(artwork_query), headers=headers)
 body = response.json()
 
-#Hole alle QIDs in eine Liste
+# Hole alle QIDs in eine Liste
 artworkQIDs = []
 for x in range(count):
-  # QID von Kunstwerk
-  postQID = body["hits"]["hits"][x]["_source"]["id"]
-  artworkQIDs.append(postQID)
-
+    # QID von Kunstwerk
+    postQID = body["hits"]["hits"][x]["_source"]["id"]
+    artworkQIDs.append(postQID)
 
 TwitterBot(artworkQIDs)
