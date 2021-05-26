@@ -1,4 +1,7 @@
 import json
+import time
+import random
+
 import tweepy
 import requests
 from config import *
@@ -8,6 +11,7 @@ import re
 from resize_img import *
 from PIL import Image
 
+# Loading credentials
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
@@ -22,17 +26,13 @@ class TwitterBot:
         postQID = self.checkPostedArtworks(self.artworkQIDs)
 
         postQIDPos = artworkQIDs.index(postQID)
-        print("artworkQIDs: ", artworkQIDs)
-        print("randorQID:", postQID)
+        # print("artworkQIDs: ", artworkQIDs)
+        print("postQID:", postQID)
         print("----------------------------------------------------------------------")
 
         # Name des Kustwerks
-        artwork_titel = body["hits"]["hits"][postQIDPos]["_source"]["label"]
-        print("artwork_titel: ", artwork_titel)
-
-        # Link des image
-        image_link = body["hits"]["hits"][postQIDPos]["_source"]["image"]
-        print("Image_Link: ", image_link)
+        artwork_title = body["hits"]["hits"][postQIDPos]["_source"]["label"]
+        print("artwork_title: ", artwork_title)
 
         # TODO:alle artist soll extrahiert werden
         # QID von Kunstler
@@ -50,15 +50,27 @@ class TwitterBot:
 
         response_artist = requests.get(url, data=json.dumps(artist_query), headers=headers)
         body_artist = response_artist.json()
+
         # Name of artist
         postArtistName = body_artist["hits"]["hits"][0]["_source"]["label"]
         print("artist_name:", postArtistName)
 
-        self.image_download(image_link)
-        imgpath = "/home/ahmad/PycharmProjects/openartbrowser-social/image.jpg"
+        # Link des image
+        image_link = body["hits"]["hits"][postQIDPos]["_source"]["image"]
+        print("Image_Link: ", image_link)
 
-        imgSizeByte = os.path.getsize(imgpath)
-        print("imgSizeByte ist: ", imgSizeByte)
+        # self.image_download(image_link)
+        imgResponse = requests.get(image_link)
+
+        filename = postQID + ".png"
+        file = open(filename, "wb")
+        file.write(imgResponse.content)
+        file.close()
+
+        # imgpath = "/home/ahmad/PycharmProjects/openartbrowser-social/image.jpg"
+
+        imgSizeByte = os.path.getsize(filename)
+        print("imgSizeByte is: ", imgSizeByte)
 
         if imgSizeByte > image_limit:
             self.addPostedArtwork(postQID)
@@ -67,19 +79,19 @@ class TwitterBot:
         else:
             if imgSizeByte > defaultSize:
                 limit_img_size(
-                    imgpath,  # input file
-                    imgpath,  # target file
+                    filename,  # input file
+                    filename,  # target file
                     3000000,  # bytes
                     tolerance=5  # percent of what the file may be bigger than target_filesize
                 )
-                imgSizeBytenew = os.path.getsize(imgpath)
+                imgSizeBytenew = os.path.getsize(filename)
                 print("new imagesize: ", imgSizeBytenew)
 
             url_post = f"https://openartbrowser.org/en/artwork/{postQID}"
-            tweet_text = f" \"{postArtistName}\" is the Artist von \"{self.sanitize(artwork_titel)}\". To see more infos see {url_post}"
+            tweet_text = self.generateTweetText(postArtistName, artwork_title, url_post)
 
             print(tweet_text)
-            api.update_with_media("/home/ahmad/PycharmProjects/openartbrowser-social/image.jpg", tweet_text)
+            api.update_with_media(filename, tweet_text)
 
             # IF TWITTER POST SUCCESSFULL
             self.addPostedArtwork(postQID)
@@ -138,6 +150,19 @@ class TwitterBot:
 
         print("Added artwork QID " + artworkQID + " to persistent file.")
 
+    def generateTweetText(self, artistName, artworkTitle, artworkURL):
+        tweetTexts = [
+            f" \"{artistName}\" is the artist of \"{self.sanitize(artworkTitle)}\". More infos can be found here: {artworkURL}",
+            f" \"{artistName}\" created \"{self.sanitize(artworkTitle)}\". Curious? Further details at: {artworkURL}",
+            f" \"{self.sanitize(artworkTitle)}\" is a masterpiece made by \"{artistName}\". Find out more: {artworkURL}",
+            f" Can you guess who made this? Created by \"{artistName}\" and titled \"{self.sanitize(artworkTitle)}\". Link: {artworkURL}",
+            f" Who created \"{self.sanitize(artworkTitle)}\"? Find the answer at {artworkURL}",
+            f" What is the name of this masterpiece made by \"{artistName}\"? The answer can be found at {artworkURL}"]
+
+        return random.choice(tweetTexts)
+
+
+# Main body of program
 
 response = requests.get(url, data=json.dumps(artwork_query), headers=headers)
 body = response.json()
@@ -149,4 +174,6 @@ for x in range(count):
     postQID = body["hits"]["hits"][x]["_source"]["id"]
     artworkQIDs.append(postQID)
 
-TwitterBot(artworkQIDs)
+while True:
+    TwitterBot(artworkQIDs)
+    time.sleep(3600)
