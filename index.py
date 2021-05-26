@@ -72,6 +72,7 @@ class TwitterBot:
             TwitterBot(self.artworkQIDs)
 
 #hello world
+#test commit with config.py
 
         else:
             if imgSizeByte > defaultSize:
