@@ -71,6 +71,8 @@ class TwitterBot:
             self.addPostedArtwork(postQID)
             TwitterBot(self.artworkQIDs)
 
+#hello world
+
         else:
             if imgSizeByte > defaultSize:
                 limit_img_size(
