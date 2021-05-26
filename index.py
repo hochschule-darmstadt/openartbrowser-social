@@ -11,6 +11,8 @@ import re
 from resize_img import *
 from PIL import Image
 
+
+
 # Loading credentials
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
@@ -59,15 +61,8 @@ class TwitterBot:
         image_link = body["hits"]["hits"][postQIDPos]["_source"]["image"]
         print("Image_Link: ", image_link)
 
-        # self.image_download(image_link)
-        imgResponse = requests.get(image_link)
-
         filename = postQID + ".png"
-        file = open(filename, "wb")
-        file.write(imgResponse.content)
-        file.close()
-
-        # imgpath = "/home/ahmad/PycharmProjects/openartbrowser-social/image.jpg"
+        self.image_download(image_link, filename)
 
         imgSizeByte = os.path.getsize(filename)
         print("imgSizeByte is: ", imgSizeByte)
@@ -116,10 +111,11 @@ class TwitterBot:
             else:
                 posted = False
 
-    def image_download(self, link):
-        response = requests.get(link)
-        file = open("image.jpg", "wb")
-        file.write(response.content)
+    def image_download(self, link, filename):
+        imgResponse = requests.get(link)
+
+        file = open(filename, "wb")
+        file.write(imgResponse.content)
         file.close()
 
     def sanitize(self, text: str):
@@ -152,12 +148,17 @@ class TwitterBot:
 
     def generateTweetText(self, artistName, artworkTitle, artworkURL):
         tweetTexts = [
-            f" \"{artistName}\" is the artist of \"{self.sanitize(artworkTitle)}\". More infos can be found here: {artworkURL}",
-            f" \"{artistName}\" created \"{self.sanitize(artworkTitle)}\". Curious? Further details at: {artworkURL}",
-            f" \"{self.sanitize(artworkTitle)}\" is a masterpiece made by \"{artistName}\". Find out more: {artworkURL}",
-            f" Can you guess who made this? Created by \"{artistName}\" and titled \"{self.sanitize(artworkTitle)}\". Link: {artworkURL}",
+            f" {artistName} is the artist of \"{self.sanitize(artworkTitle)}\". More infos can be found here: {artworkURL}",
+            f" {artistName} created \"{self.sanitize(artworkTitle)}\". Curious? Further details at: {artworkURL}",
+            f" \"{self.sanitize(artworkTitle)}\" is a masterpiece made by {artistName}. Find out more: {artworkURL}",
+            f" Can you guess who made this? Created by {artistName} and titled \"{self.sanitize(artworkTitle)}\". Link: {artworkURL}",
             f" Who created \"{self.sanitize(artworkTitle)}\"? Find the answer at {artworkURL}",
-            f" What is the name of this masterpiece made by \"{artistName}\"? The answer can be found at {artworkURL}"]
+            f" What is the name of this masterpiece made by {artistName}? The answer can bd found at {artworkURL}",
+            f" \"{self.sanitize(artworkTitle)}\" by {artistName}. Link: {artworkURL}",
+            f" {artistName} made \"{self.sanitize(artworkTitle)}\". Link: {artworkURL}",
+            f" Like it? \"{self.sanitize(artworkTitle)}\". Find out more: {artworkURL}",
+            f" Artwork of the week: \"{self.sanitize(artworkTitle)}\". More details here: {artworkURL}"
+        ]
 
         return random.choice(tweetTexts)
 
@@ -174,6 +175,4 @@ for x in range(count):
     postQID = body["hits"]["hits"][x]["_source"]["id"]
     artworkQIDs.append(postQID)
 
-while True:
-    TwitterBot(artworkQIDs)
-    time.sleep(3600)
+TwitterBot(artworkQIDs)
