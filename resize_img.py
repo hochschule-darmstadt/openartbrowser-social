@@ -1,5 +1,4 @@
 from PIL import Image
-import os
 import io
 
 def limit_img_size(img_filename, img_target_filename, target_filesize, tolerance=5):
