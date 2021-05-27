@@ -81,9 +81,11 @@ class twitterBot:
         print("Image_Link: ", image_link)
 
         # Prepare file name to download image and save it
-        filename = postQID + ".png"
+        image_name = postQID + ".png"
+        filename = filepath + "/oab/" + image_name
+
         # Download image with method image_download
-        self.image_download(image_link, filename)
+        self.image_download(image_link, image_name)
 
         # Get size of image file (bytes)
         imgSizeByte = os.path.getsize(filename)
