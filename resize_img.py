@@ -1,6 +1,8 @@
 from PIL import Image
 import io
 
+# Resizes image to less than tweet post limit
+
 def limit_img_size(img_filename, img_target_filename, target_filesize, tolerance=5):
     img = img_orig = Image.open(img_filename)
     aspect = img.size[0] / img.size[1]
@@ -18,6 +20,7 @@ def limit_img_size(img_filename, img_target_filename, target_filesize, tolerance
             with open(img_target_filename, "wb") as f:
                 f.write(data)
             break
+
         else:
             # filesize not good enough => adapt width and height
             # use sqrt of deviation since applied both in width and height
@@ -25,5 +28,3 @@ def limit_img_size(img_filename, img_target_filename, target_filesize, tolerance
             new_height = new_width / aspect
             # resize from img_orig to not lose quality
             img = img_orig.resize((int(new_width), int(new_height)))
-
-

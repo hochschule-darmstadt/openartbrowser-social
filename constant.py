@@ -1,8 +1,8 @@
 url = "https://openartbrowser.org/api/en/_search"
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-count = 50
-image_limit = 200000000
-defaultSize = 3072000
+count = 100
+image_processing_limit = 200000000
+tweet_max_size = 3072000
 
 artwork_query = {
   "sort": [
@@ -19,4 +19,3 @@ artwork_query = {
     }
   }
 }
-

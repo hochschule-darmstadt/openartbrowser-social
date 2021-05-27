@@ -2,9 +2,9 @@
 import tweepy  # Tweets creation and posting
 import json  # Using JSON data
 import random  # Random selection
-import requests  # HTTP Request
 import re  # Regex
 import os  # OS operations
+import requests  # Requests library
 
 # Loading data from local files
 from config import *  # Config includes authentication data
@@ -88,27 +88,30 @@ class twitterBot:
         # Get size of image file (bytes)
         imgSizeByte = os.path.getsize(filename)
         # Print image size to log
-        print("imgSizeByte is: ", imgSizeByte)
+        print("Image size in Bytes is: ", imgSizeByte)
 
-        # Check if image size is greater than constant image limit
-        # If yes,
-        while imgSizeByte > image_limit:
-            limit_img_size(
-                filename,  # input file
-                filename,  # target file
-                3000000,  # bytes
-                tolerance=5  # percent of what the file may be bigger than target_filesize
-            )
+        # Check if image size is greater than constant image limit and only then make post. If size is too big,
+        # post will fail.
+        if imgSizeByte < image_processing_limit:
+            if imgSizeByte > tweet_max_size:
+                limit_img_size(
+                    filename,  # input file
+                    filename,  # target file
+                    3000000,  # bytes
+                    tolerance=5  # percent of what the file may be bigger than target_filesize
+                )
+                imgSizeByte = os.path.getsize(filename)
+                print("New image size in Bytes is: ", imgSizeByte)
 
-            imgSizeByte = os.path.getsize(filename)
-            print("new imagesize: ", imgSizeByte)
+            # Send Twitter post with file and tweet text
+            api.update_with_media(filename, tweet_text)
 
-        #Send Twitter post with file and tweet text
-        api.update_with_media(filename, tweet_text)
-        #After twitter post, add QID to persistent file
+        # After twitter post (or lack thereof), add QID to persistent file
         self.addPostedArtwork(postQID)
+        os.remove(filename)
 
-    # All posted artwork IDs are written to a file. In this method, we will find the first artwork from the provided list "artworkIDList" (top-down) which has not yet been posted and return it.
+    # All posted artwork IDs are written to a file. In this method, we will find the first artwork from the provided
+    # list "artworkIDList" (top-down) which has not yet been posted and return it.
     def checkPostedArtworks(self, artworkQIDs):
         posted = False
         postedList = [""]
@@ -164,17 +167,18 @@ class twitterBot:
         print("Added artwork QID " + artworkQID + " to persistent file.")
 
     def generateTweetText(self, artistName, artworkTitle, artworkURL):
+        artworkTitle = self.sanitize(artworkTitle)
         tweetTexts = [
-            f" {artistName} is the artist of \"{self.sanitize(artworkTitle)}\". More infos can be found here: {artworkURL}",
-            f" {artistName} created \"{self.sanitize(artworkTitle)}\". Curious? Further details at: {artworkURL}",
-            f" \"{self.sanitize(artworkTitle)}\" is a masterpiece made by {artistName}. Find out more: {artworkURL}",
-            f" Can you guess who made this? Created by {artistName} and titled \"{self.sanitize(artworkTitle)}\". Link: {artworkURL}",
-            f" Who created \"{self.sanitize(artworkTitle)}\"? Find the answer at {artworkURL}",
+            f" {artistName} is the artist of \"{artworkTitle}\". More infos can be found here: {artworkURL}",
+            f" {artistName} created \"{artworkTitle}\". Curious? Further details at: {artworkURL}",
+            f" \"{artworkTitle}\" is a masterpiece made by {artistName}. Find out more: {artworkURL}",
+            f" Can you guess who made this? Titled \"{artworkTitle}\". Link: {artworkURL}",
+            f" Who created \"{artworkTitle}\"? Find the answer at {artworkURL}",
             f" What is the name of this masterpiece made by {artistName}? The answer can bd found at {artworkURL}",
-            f" \"{self.sanitize(artworkTitle)}\" by {artistName}. Link: {artworkURL}",
-            f" {artistName} made \"{self.sanitize(artworkTitle)}\". Link: {artworkURL}",
-            f" Like it? \"{self.sanitize(artworkTitle)}\". Find out more: {artworkURL}",
-            f" Artwork of the week: \"{self.sanitize(artworkTitle)}\". More details here: {artworkURL}"
+            f" \"{artworkTitle}\" by {artistName}. Link: {artworkURL}",
+            f" {artistName} made \"{artworkTitle}\". Link: {artworkURL}",
+            f" Like it? \"{artworkTitle}\". Find out more at: {artworkURL}",
+            f" Artwork of the week: \"{artworkTitle}\". More details here: {artworkURL}"
         ]
 
         return random.choice(tweetTexts)
