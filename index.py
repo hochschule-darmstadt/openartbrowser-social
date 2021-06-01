@@ -9,6 +9,7 @@ body = response.json()
 
 # Initialize artwork QIDs list
 artworkQIDs = []
+
 # Count is from constant file - no. artworks to retrieve from ElasticSearch.
 # Load artwork QIDs into artworkQIDs array
 for x in range(count):
