@@ -82,7 +82,7 @@ def generateTweetText(artistName, artworkTitle, artworkURL):
         f" \"{artworkTitle}\" is a masterpiece made by {artistName}. Find out more: {artworkURL}",
         f" Can you guess who made this? Titled \"{artworkTitle}\". Link: {artworkURL}",
         f" Who created \"{artworkTitle}\"? Find the answer at {artworkURL}",
-        f" What is the name of this masterpiece made by {artistName}? The answer can bd found at {artworkURL}",
+        f" What is the name of this masterpiece made by {artistName}? The answer can be found at {artworkURL}",
         f" \"{artworkTitle}\" by {artistName}. Link: {artworkURL}",
         f" {artistName} made \"{artworkTitle}\". Link: {artworkURL}",
         f" Like it? \"{artworkTitle}\". Find out more at: {artworkURL}",
@@ -163,7 +163,8 @@ class twitterBot:
 
         # Prepare file name to download image and save it
         image_name = postQID + ".png"
-        image_path = file_path + "/oab/" + image_name
+        #image_path = file_path + "/oab/" + image_name
+        image_path = image_name
 
         # Hint: for local testing, pls comment the image_path above and use the following.
         # On the staging server, we require the image_path in the format above,
