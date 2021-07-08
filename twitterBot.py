@@ -43,7 +43,7 @@ def check_posted_artworks(artworkQIDs):
             posted = False
 
 
-def sanitize(text: str):
+def sanitize(text):
     """
     This function removes linebreaks, carriage returns, duplicated spaces and all leading
     and trailing spaces from the passed string and returns the sanitized one. This function should be used
