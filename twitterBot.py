@@ -163,8 +163,8 @@ class twitterBot:
 
         # Prepare file name to download image and save it
         image_name = postQID + ".png"
-        #image_path = file_path + "/oab/" + image_name
-        image_path = image_name
+        image_path = file_path + "/oab/" + image_name
+        #image_path = image_name
 
         # Hint: for local testing, pls comment the image_path above and use the following.
         # On the staging server, we require the image_path in the format above,
